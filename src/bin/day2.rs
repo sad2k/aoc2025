@@ -10,17 +10,23 @@ fn is_invalid_id(id: u64) -> bool {
     (id % power_of_ten) == (id / power_of_ten)
 }
 
-fn find_sum_of_invalid_ids(from: u64, to: u64) -> u64 {
+fn find_sum_of_invalid_ids<F>(from: u64, to: u64, invalid_id_checker: F) -> u64
+where
+    F: Fn(u64) -> bool,
+{
     let mut result = 0;
     for i in from..=to {
-        if is_invalid_id(i) {
+        if invalid_id_checker(i) {
             result += i;
         }
     }
     result
 }
 
-fn part1(lines: &str) -> u64 {
+fn solve<F>(lines: &str, invalid_id_checker: F) -> u64
+where
+    F: Fn(u64) -> bool,
+{
     let mut result = 0;
     let intervals: Vec<_> = lines
         .split(",")
@@ -31,7 +37,7 @@ fn part1(lines: &str) -> u64 {
         })
         .collect();
     for interval in &intervals {
-        result += find_sum_of_invalid_ids(interval[0], interval[1]);
+        result += find_sum_of_invalid_ids(interval[0], interval[1], &invalid_id_checker);
     }
     result
 }
@@ -41,5 +47,8 @@ fn main() {
     let lines = contents.lines();
 
     // part 1
-    println!("{}", part1(lines.clone().next().unwrap()));
+    println!("{}", solve(lines.clone().next().unwrap(), is_invalid_id));
+
+    // part 2
+    // println!("{}", part2(lines.clone().next().unwrap()));
 }
