@@ -1,5 +1,4 @@
 use std::fs;
-use std::str::Lines;
 
 const TEN: u64 = 10;
 fn is_invalid_id(id: u64) -> bool {
