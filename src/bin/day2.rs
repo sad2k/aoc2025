@@ -11,6 +11,36 @@ fn is_invalid_id_part1(id: u64) -> bool {
     (id % power_of_ten) == (id / power_of_ten)
 }
 
+fn is_invalid_with_size(v: &[u64], size: usize) -> bool {
+    for i in (0..v.len()).step_by(size) {
+        if i > 0 {
+            if &v[i..i+size] != &v[i-size..i] {
+                return false;
+            }
+        }
+    }
+    true
+}
+
+fn is_invalid_id_part2(id: u64) -> bool {
+    let mut id0 = id;
+    let mut v = Vec::new();
+    while id0 > 0 {
+        v.push(id0 % 10);
+        id0 /= 10;
+    }
+    v.reverse();
+    let l = v.len();
+    for size in 1..=(l / 2) {
+        if l % size == 0 {
+            if is_invalid_with_size(&v, size) {
+                return true;
+            }
+        }
+    }
+    false
+}
+
 fn find_sum_of_invalid_ids<F>(from: u64, to: u64, invalid_id_checker: F) -> u64
 where
     F: Fn(u64) -> bool,
@@ -48,8 +78,11 @@ fn main() {
     let lines = contents.lines();
 
     // part 1
-    println!("{}", solve(lines.clone().next().unwrap(), is_invalid_id_part1));
+    // println!("{}", solve(lines.clone().next().unwrap(), is_invalid_id_part1));
 
     // part 2
-    // println!("{}", part2(lines.clone().next().unwrap()));
+    println!(
+        "{}",
+        solve(lines.clone().next().unwrap(), is_invalid_id_part2)
+    );
 }
