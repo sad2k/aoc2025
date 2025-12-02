@@ -1,7 +1,7 @@
 use std::fs;
 
 const TEN: u64 = 10;
-fn is_invalid_id(id: u64) -> bool {
+fn is_invalid_id_part1(id: u64) -> bool {
     let mut log = id.ilog(10);
     if log % 2 != 0 {
         log += 1;
@@ -47,7 +47,7 @@ fn main() {
     let lines = contents.lines();
 
     // part 1
-    println!("{}", solve(lines.clone().next().unwrap(), is_invalid_id));
+    println!("{}", solve(lines.clone().next().unwrap(), is_invalid_id_part1));
 
     // part 2
     // println!("{}", part2(lines.clone().next().unwrap()));
