@@ -1,6 +1,7 @@
 use std::fs;
 
 const TEN: u64 = 10;
+
 fn is_invalid_id_part1(id: u64) -> bool {
     let mut log = id.ilog(10);
     if log % 2 != 0 {
