@@ -3,7 +3,7 @@ use std::fs;
 const TEN: u64 = 10;
 
 fn is_invalid_id_part1(id: u64) -> bool {
-    let mut log = id.ilog(10);
+    let mut log = id.ilog(TEN);
     if log % 2 != 0 {
         log += 1;
     }
@@ -12,11 +12,9 @@ fn is_invalid_id_part1(id: u64) -> bool {
 }
 
 fn is_invalid_with_size(v: &[u64], size: usize) -> bool {
-    for i in (0..v.len()).step_by(size) {
-        if i > 0 {
-            if &v[i..i+size] != &v[i-size..i] {
-                return false;
-            }
+    for i in (size..v.len()).step_by(size) {
+        if &v[i..i + size] != &v[i - size..i] {
+            return false;
         }
     }
     true
