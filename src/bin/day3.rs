@@ -39,11 +39,33 @@ fn part1(input: &Vec<Vec<u8>>) -> u64 {
     res
 }
 
+fn find_bank_max_part2(bank: &[u8]) -> u64 {
+    let mut res: u64 = 0;
+    let mut start_idx = 0;
+    for i in 0..12 {
+        let idx = argmax(bank, start_idx, bank.len() - (12 - i - 1));
+        res = res * 10 + bank[idx] as u64;
+        start_idx = idx + 1;
+    }
+    res
+}
+
+fn part2(input: &Vec<Vec<u8>>) -> u64 {
+    let mut res = 0;
+    for line in input {
+        res += find_bank_max_part2(&line);
+    }
+    res
+}
+
 fn main() {
     let contents = fs::read_to_string("inputs/day3.txt").unwrap();
     let lines = contents.lines();
     let parsed = parse(lines);
 
     // part 1
-    println!("{}", part1(&parsed));
+    // println!("{}", part1(&parsed));
+
+    // part 1
+    println!("{}", part2(&parsed));
 }
