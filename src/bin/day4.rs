@@ -1,16 +1,15 @@
 use std::collections::HashSet;
 use std::fs;
+use std::hash::Hash;
+use std::ops::Deref;
 use std::str::Lines;
 
-#[derive(Debug)]
-struct Grid {
-    rolls: HashSet<(i32, i32)>,
-}
+type Grid = HashSet<(i32, i32)>;
 
 fn parse(lines: Lines<'_>) -> Grid {
     let mut r: usize = 0;
     let mut c: usize = 0;
-    let mut rolls: HashSet<(i32,i32)> = HashSet::new();
+    let mut rolls: HashSet<(i32, i32)> = HashSet::new();
     for line in lines {
         for (c, ch) in line.chars().enumerate() {
             if ch == '@' {
@@ -20,19 +19,43 @@ fn parse(lines: Lines<'_>) -> Grid {
         r += 1;
         c = line.len();
     }
-    Grid {
-        rolls,
-    }
+    rolls
 }
 
 fn part1(grid: &Grid) -> usize {
     let mut res = 0;
-    for (r, c) in &grid.rolls {
+    for (r, c) in grid.iter() {
         if is_accessible(*r, *c, grid) {
             res += 1;
         }
     }
     res
+}
+
+fn part2(grid: &Grid) -> usize {
+    let mut rolls = grid.clone();
+    let mut res = 0;
+    loop {
+        let deleted = delete_rolls(&mut rolls);
+        if deleted == 0 {
+            break;
+        }
+        res += deleted;
+    }
+    res
+}
+
+fn delete_rolls(grid: &mut Grid) -> usize {
+    let mut to_delete = HashSet::new();
+    for (r, c) in grid.iter() {
+        if is_accessible(*r, *c, &grid) {
+            to_delete.insert((*r, *c));
+        }
+    }
+    for d in &to_delete {
+        grid.remove(&d);
+    }
+    to_delete.len()
 }
 
 fn is_accessible(r: i32, c: i32, grid: &Grid) -> bool {
@@ -48,7 +71,7 @@ fn is_accessible(r: i32, c: i32, grid: &Grid) -> bool {
     ];
     candidates
         .iter()
-        .filter(|(r, c)| grid.rolls.contains(&(*r, *c)))
+        .filter(|(r, c)| grid.contains(&(*r, *c)))
         .count()
         < 4
 }
@@ -59,5 +82,8 @@ fn main() {
     let parsed = parse(lines);
 
     // part 1
-    println!("{}", part1(&parsed));
+    // println!("{}", part1(&parsed));
+
+    // part 2
+    println!("{}", part2(&parsed));
 }
