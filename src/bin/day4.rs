@@ -4,8 +4,6 @@ use std::str::Lines;
 
 #[derive(Debug)]
 struct Grid {
-    rows: usize,
-    cols: usize,
     rolls: HashSet<(i32, i32)>,
 }
 
@@ -23,8 +21,6 @@ fn parse(lines: Lines<'_>) -> Grid {
         c = line.len();
     }
     Grid {
-        rows: r,
-        cols: c,
         rolls,
     }
 }
