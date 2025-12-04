@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 use std::fs;
 use std::hash::Hash;
-use std::ops::Deref;
 use std::str::Lines;
 
 type Grid = HashSet<(i32, i32)>;
