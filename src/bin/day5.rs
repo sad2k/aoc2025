@@ -35,6 +35,27 @@ fn is_fresh(id: u64, ranges: &[(u64, u64)]) -> bool {
     false
 }
 
+fn part2(ranges: &Vec<(u64, u64)>) -> u64 {
+    let mut upd_ranges = Vec::new();
+    let mut largest_to: Option<u64> = None;
+    for (from, to) in ranges {
+        if largest_to.is_none() {
+            upd_ranges.push((*from, *to));
+        } else {
+            let mut upd_from = *from;
+            let mut upd_to = *to;
+            if upd_from <= largest_to.unwrap() {
+                upd_from = largest_to.unwrap() + 1;
+            }
+            if upd_to >= upd_from {
+                upd_ranges.push((upd_from, upd_to));
+            }
+        }
+        largest_to = Some(largest_to.unwrap_or(0).max(*to));
+    }
+    upd_ranges.iter().map(|(from, to)| to - from + 1).sum()
+}
+
 fn main() {
     let contents = fs::read_to_string("inputs/day5.txt").unwrap();
     let lines: Vec<_> = contents.lines().collect();
@@ -44,5 +65,8 @@ fn main() {
     let ids = parse_ids(&lines_split[1]);
 
     // part 1
-    println!("{:?}", part1(&ids, &ranges));
+    // println!("{:?}", part1(&ids, &ranges));
+
+    // part 2
+    println!("{:?}", part2(&ranges));
 }
