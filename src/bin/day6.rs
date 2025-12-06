@@ -3,7 +3,7 @@ use std::str::Lines;
 
 type Problem = (Vec<u64>, char);
 
-fn parse(lines: Lines<'_>) -> Vec<Problem> {
+fn parse_part1(lines: Lines<'_>) -> Vec<Problem> {
     let mut res = Vec::new();
     let collected_lines: Vec<_> = lines.collect();
     for (i, line) in collected_lines.iter().enumerate() {
@@ -32,15 +32,15 @@ fn solve(problem: &Problem) -> u64 {
     }
 }
 
-fn part1(problems: &Vec<Problem>) -> u64 {
+fn solve_all(problems: &Vec<Problem>) -> u64 {
     problems.iter().map(solve).sum()
 }
 
 fn main() {
     let contents = fs::read_to_string("inputs/day6.txt").unwrap();
     let lines = contents.lines();
-    let problems = parse(lines);
 
     // part 1
-    println!("{:?}", part1(&problems));
+    let problems = parse_part1(lines);
+    println!("{:?}", solve_all(&problems));
 }
