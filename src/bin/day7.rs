@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::str::Lines;
 
@@ -64,11 +64,39 @@ fn part1(diagram: &Diagram) -> u64 {
     res
 }
 
+fn part2(diagram: &Diagram) -> u64 {
+    let mut res = 1;
+    let mut beams = HashMap::new();
+    beams.insert(diagram.start, 1);
+    for r in 0..diagram.rows {
+        let mut new_beams = HashMap::new();
+        for (beam, mult) in &beams {
+            assert_eq!(beam.0, r);
+            if diagram.splitters.contains(&beam) {
+                res += mult;
+                if beam.1 > 0 {
+                    *new_beams.entry((beam.0 + 1, beam.1 - 1)).or_insert(0) += mult;
+                }
+                if beam.1 < diagram.cols - 1 {
+                    *new_beams.entry((beam.0 + 1, beam.1 + 1)).or_insert(0) += mult;
+                }
+            } else {
+                *new_beams.entry((beam.0 + 1, beam.1)).or_insert(0) += mult;;
+            }
+        }
+        beams = new_beams;
+    }
+    res
+}
+
 fn main() {
     let contents = fs::read_to_string("inputs/day7.txt").unwrap();
     let lines = contents.lines();
     let diagram = parse(lines);
 
     // part 1
-    println!("{}", part1(&diagram));
+    // println!("{}", part1(&diagram));
+
+    // part 2
+    println!("{}", part2(&diagram));
 }
