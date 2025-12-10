@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::str::Lines;
 
@@ -94,11 +94,74 @@ fn part1(input: &Vec<Coord>) -> u64 {
     top.iter().take(3).product::<u64>()
 }
 
+fn part2(input: &Vec<Coord>) -> u64 {
+    let distances = calculate_distances(&input);
+    let mut coord_to_circuits = HashMap::new();
+    let mut uncircuited = HashSet::new();
+    for c in input {
+        coord_to_circuits.insert(c.clone(), 0);
+        uncircuited.insert(c.clone());
+    }
+    let mut circuits_to_coords = HashMap::new();
+    let mut id_gen = 1;
+    let mut i = 0;
+    loop {
+        let (from, to, _) = &distances[i];
+        let from_circuit = coord_to_circuits[from];
+        let to_circuit = coord_to_circuits[to];
+        match (from_circuit, to_circuit) {
+            (0, 0) => {
+                // create new circuit
+                let id = id_gen;
+                id_gen += 1;
+                *coord_to_circuits.get_mut(from).unwrap() = id;
+                *coord_to_circuits.get_mut(to).unwrap() = id;
+                circuits_to_coords.insert(id, vec![*from, *to]);
+                uncircuited.remove(&from);
+                uncircuited.remove(&to);
+            }
+            (0, circuit) => {
+                // add to existing circuit
+                *coord_to_circuits.get_mut(from).unwrap() = circuit;
+                circuits_to_coords.get_mut(&circuit).unwrap().push(*from);
+                uncircuited.remove(&from);
+            }
+            (circuit, 0) => {
+                // add to existing circuit
+                *coord_to_circuits.get_mut(to).unwrap() = circuit;
+                circuits_to_coords.get_mut(&circuit).unwrap().push(*to);
+                uncircuited.remove(&to);
+            }
+            (circuit1, circuit2) if circuit1 != circuit2 => {
+                // merge 2 circuits
+                // arbitrarily move from 2nd to 1st
+                let moved_coords = circuits_to_coords.remove(&circuit2).unwrap();
+                for c in moved_coords {
+                    circuits_to_coords
+                        .get_mut(&circuit1)
+                        .unwrap()
+                        .push(c.clone());
+                    *coord_to_circuits.get_mut(&c).unwrap() = circuit1;
+                }
+            }
+            (_, _) => {}
+        }
+        if uncircuited.is_empty() && circuits_to_coords.len() == 1 {
+            break;
+        }
+        i += 1;
+    }
+    distances[i].0.0 * distances[i].1.0
+}
+
 fn main() {
     let contents = fs::read_to_string("inputs/day8.txt").unwrap();
     let lines = contents.lines();
     let parsed = parse(lines);
 
     // part 1
-    println!("{:?}", part1(&parsed));
+    // println!("{:?}", part1(&parsed));
+
+    // part 2
+    println!("{:?}", part2(&parsed));
 }
