@@ -140,10 +140,80 @@ fn build_outer_shell(coords: &[(i64, i64)]) -> Vec<(i64, i64)> {
     res
 }
 
+fn orient(a: (i64, i64), b: (i64, i64), c: (i64, i64)) -> i64 {
+    (b.0 - a.0) * (c.1 - a.1) - (b.1 - a.1) * (c.0 - a.0)
+}
+
+fn on_segment(a: (i64, i64), b: (i64, i64), c: (i64, i64)) -> bool {
+    // assumes a, b, c are collinear; checks if c lies within the bounding box of segment ab
+    c.0 >= a.0.min(b.0) && c.0 <= a.0.max(b.0) && c.1 >= a.1.min(b.1) && c.1 <= a.1.max(b.1)
+}
+
+fn is_intersect(p0: (i64, i64), p1: (i64, i64), q0: (i64, i64), q1: (i64, i64)) -> bool {
+    let o1 = orient(p0, p1, q0);
+    let o2 = orient(p0, p1, q1);
+    let o3 = orient(q0, q1, p0);
+    let o4 = orient(q0, q1, p1);
+
+    if (o1 > 0) != (o2 > 0) && (o3 > 0) != (o4 > 0) {
+        return true;
+    }
+
+    if o1 == 0 && on_segment(p0, p1, q0) {
+        return true;
+    }
+    if o2 == 0 && on_segment(p0, p1, q1) {
+        return true;
+    }
+    if o3 == 0 && on_segment(q0, q1, p0) {
+        return true;
+    }
+    if o4 == 0 && on_segment(q0, q1, p1) {
+        return true;
+    }
+    false
+}
+
+fn have_intersections(p0: (i64, i64), p1: (i64, i64), outer_shell: &Vec<(i64, i64)>) -> bool {
+    let square_perimeter = vec![
+        ((p0.0, p0.1), (p1.0, p0.1)),
+        ((p1.0, p0.1), (p1.0, p1.1)),
+        ((p1.0, p1.1), (p0.0, p1.1)),
+        ((p0.0, p1.1), (p0.0, p0.1))
+    ];
+    for i in 0..outer_shell.len() {
+        let q0: (i64, i64);
+        let q1: (i64, i64);
+        q0 = outer_shell[i];
+        q1 = if i == outer_shell.len() - 1 {
+            outer_shell[0]
+        } else {
+            outer_shell[i + 1]
+        };
+        for (p0prime,p1prime) in &square_perimeter {
+            if is_intersect(*p0prime, *p1prime, q0, q1) {
+                // println!("intersection: {:?} {:?} {:?} {:?}", p0, p1, q0, q1);
+                return true;
+            }
+        }
+    }
+    false
+}
+
 fn part2(coords: &[(i64, i64)]) -> i64 {
     let outer_shell = build_outer_shell(coords);
-    println!("{:?}", outer_shell);
-    0
+    let mut max_area = 0;
+    for i in 0..coords.len() {
+        for j in (i + 1)..coords.len() {
+            if !have_intersections(coords[i], coords[j], &outer_shell) {
+                let a = area(coords[i], coords[j]);
+                if a > max_area {
+                    max_area = a;
+                }
+            }
+        }
+    }
+    max_area
 }
 
 fn main() {
