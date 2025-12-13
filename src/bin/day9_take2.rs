@@ -59,7 +59,7 @@ fn is_intersect(p0: (f64, f64), p1: (f64, f64), q0: (f64, f64), q1: (f64, f64)) 
     false
 }
 
-fn have_intersections(p0: (i64, i64), p1: (i64, i64), outer_shell: &[(i64, i64)]) -> bool {
+fn have_intersections(p0: (i64, i64), p1: (i64, i64), coords: &[(i64, i64)]) -> bool {
     let p0small = (p0.0.min(p1.0) as f64 + 0.5, p0.1.min(p1.1) as f64 + 0.5);
     let p1small = (p0.0.max(p1.0) as f64 - 0.5, p0.1.max(p1.1) as f64 - 0.5);
     let square_perimeter = vec![
@@ -68,14 +68,14 @@ fn have_intersections(p0: (i64, i64), p1: (i64, i64), outer_shell: &[(i64, i64)]
         ((p1small.0, p1small.1), (p0small.0, p1small.1)),
         ((p0small.0, p1small.1), (p0small.0, p0small.1)),
     ];
-    for i in 0..outer_shell.len() {
+    for i in 0..coords.len() {
         let q0: (f64, f64);
         let q1: (f64, f64);
-        q0 = (outer_shell[i].0 as f64, outer_shell[i].1 as f64);
-        q1 = if i == outer_shell.len() - 1 {
-            (outer_shell[0].0 as f64, outer_shell[0].1 as f64)
+        q0 = (coords[i].0 as f64, coords[i].1 as f64);
+        q1 = if i == coords.len() - 1 {
+            (coords[0].0 as f64, coords[0].1 as f64)
         } else {
-            (outer_shell[i + 1].0 as f64, outer_shell[i + 1].1 as f64)
+            (coords[i + 1].0 as f64, coords[i + 1].1 as f64)
         };
         for (p0prime, p1prime) in &square_perimeter {
             if is_intersect(*p0prime, *p1prime, q0, q1) {
