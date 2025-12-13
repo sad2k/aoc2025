@@ -14,7 +14,7 @@ fn parse(lines: Lines) -> Vec<(i64, i64)> {
 }
 
 fn area(c1: (i64, i64), c2: (i64, i64)) -> i64 {
-    (c1.0 - c2.0 + 1).abs() * (c1.1 - c2.1 + 1).abs()
+    ((c1.0 - c2.0).abs() + 1) * ((c1.1 - c2.1).abs() + 1)
 }
 
 fn part1(coords: &[(i64, i64)]) -> i64 {
@@ -123,7 +123,6 @@ fn build_outer_shell(coords: &[(i64, i64)]) -> Vec<(i64, i64)> {
             corner_coords.push(coords[i + 1]);
         }
         let (corner_type, corner_direction) = classify_corner(&corner_coords);
-        // println!("{corner_type:?} {corner_direction:?}");
         res.push(match (corner_type, corner_direction) {
             // clockwise
             (CornerType::TopRight, CornerDirection::Clockwise) => (c.0 + 1, c.1 - 1),
@@ -196,7 +195,6 @@ fn have_intersections(p0: (i64, i64), p1: (i64, i64), outer_shell: &[(i64, i64)]
         };
         for (p0prime, p1prime) in &square_perimeter {
             if is_intersect(*p0prime, *p1prime, q0, q1) {
-                // println!("intersection: {:?} {:?} {:?} {:?}", p0, p1, q0, q1);
                 return true;
             }
         }
@@ -206,7 +204,6 @@ fn have_intersections(p0: (i64, i64), p1: (i64, i64), outer_shell: &[(i64, i64)]
 
 fn part2(coords: &[(i64, i64)]) -> i64 {
     let outer_shell = build_outer_shell(coords);
-    println!("{:?}", outer_shell);
     let mut max_area = 0;
     for i in 0..coords.len() {
         for j in (i + 1)..coords.len() {
@@ -225,7 +222,6 @@ fn main() {
     let contents = fs::read_to_string("inputs/day9.txt").unwrap();
     let lines = contents.lines();
     let parsed = parse(lines);
-    println!("{:?}", parsed);
 
     // part 1
     // println!("{}", part1(&parsed));
