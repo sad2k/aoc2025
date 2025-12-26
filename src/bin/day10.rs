@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::collections::HashSet;
 use std::fs;
 use std::str::Lines;
@@ -37,6 +36,7 @@ fn parse(lines: Lines) -> Vec<Machine> {
     res
 }
 
+// Super slow, can't be bothered to optimize further :)
 fn solve0(
     state: &Vec<bool>,
     target: &Vec<bool>,
