@@ -59,9 +59,7 @@ fn solve0(
             }
         }
         if new_state == *target {
-            if new_current.is_none() || step < new_current.unwrap() {
-                new_current = Some(step);
-            }
+            return Some(step);
         } else if remaining_buttons.len() > 1
             && (new_current.is_none() || (step + 1) < new_current.unwrap())
         {
