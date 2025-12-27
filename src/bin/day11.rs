@@ -41,11 +41,48 @@ fn part1(graph: &Graph) -> usize {
     }
     res
 }
+
+fn traverse_cached<'a, 'c>(
+    graph: &'a Graph,
+    from: &'a str,
+    cache: &'c mut HashMap<&'a str, Vec<Vec<&'a str>>>,
+) -> &'c Vec<Vec<&'a str>> {
+    if !cache.contains_key(from) {
+        if from == "out" {
+            cache.insert("out", vec![vec!["out"]]);
+        } else {
+            let mut cached_res = Vec::new();
+            let node = &graph.nodes[from];
+            for oe in &node.output_edges {
+                let paths = traverse_cached(graph, oe, cache);
+                for p in paths {
+                    let mut cached_path = Vec::new();
+                    cached_path.push(from);
+                    cached_path.extend(p.iter().copied());
+                    cached_res.push(cached_path);
+                }
+            }
+            cache.insert(from, cached_res);
+        }
+    }
+    &cache[from]
+}
+
+fn part2(graph: &Graph) -> usize {
+    let mut cache = HashMap::new();
+    let paths = traverse_cached(&graph, &"svr", &mut cache);
+    println!("{:?}", paths);
+    0
+}
+
 fn main() {
     let contents = fs::read_to_string("inputs/day11.txt").unwrap();
     let lines = contents.lines();
     let parsed = parse(lines);
 
     // part 1
-    println!("{:?}", part1(&parsed));
+    // println!("{:?}", part1(&parsed));
+
+    // part 2
+    println!("{:?}", part2(&parsed));
 }
