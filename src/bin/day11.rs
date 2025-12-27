@@ -13,6 +13,14 @@ struct Graph<'a> {
     nodes: HashMap<&'a str, Node<'a>>,
 }
 
+#[derive(Debug, Clone, Copy)]
+struct CachedPaths {
+    total_paths: u64,
+    paths_via_fft: u64,
+    paths_via_dac: u64,
+    paths_via_fft_and_dac: u64,
+}
+
 fn parse(lines: Lines) -> Graph {
     let mut nodes: HashMap<&str, Node> = HashMap::new();
     for line in lines {
@@ -45,34 +53,61 @@ fn part1(graph: &Graph) -> usize {
 fn traverse_cached<'a, 'c>(
     graph: &'a Graph,
     from: &'a str,
-    cache: &'c mut HashMap<&'a str, Vec<Vec<&'a str>>>,
-) -> &'c Vec<Vec<&'a str>> {
+    cache: &'c mut HashMap<&'a str, CachedPaths>,
+) -> CachedPaths {
     if !cache.contains_key(from) {
         if from == "out" {
-            cache.insert("out", vec![vec!["out"]]);
+            cache.insert(
+                "out",
+                CachedPaths {
+                    total_paths: 1,
+                    paths_via_dac: 0,
+                    paths_via_fft: 0,
+                    paths_via_fft_and_dac: 0,
+                },
+            );
         } else {
-            let mut cached_res = Vec::new();
             let node = &graph.nodes[from];
+            let mut total_paths = 0;
+            let mut paths_via_dac = 0;
+            let mut paths_via_fft = 0;
+            let mut paths_via_fft_and_dac = 0;
             for oe in &node.output_edges {
-                let paths = traverse_cached(graph, oe, cache);
-                for p in paths {
-                    let mut cached_path = Vec::new();
-                    cached_path.push(from);
-                    cached_path.extend(p.iter().copied());
-                    cached_res.push(cached_path);
-                }
+                let cached_paths = traverse_cached(graph, oe, cache);
+                total_paths += cached_paths.total_paths;
+                paths_via_dac += cached_paths.paths_via_dac;
+                paths_via_fft += cached_paths.paths_via_fft;
+                paths_via_fft_and_dac += cached_paths.paths_via_fft_and_dac;
             }
-            cache.insert(from, cached_res);
+            match from {
+                "fft" => {
+                    paths_via_fft = total_paths;
+                    paths_via_fft_and_dac = paths_via_dac;
+                }
+                "dac" => {
+                    paths_via_dac = total_paths;
+                    paths_via_fft_and_dac = paths_via_fft;
+                }
+                _ => {}
+            }
+            cache.insert(
+                from,
+                CachedPaths {
+                    total_paths,
+                    paths_via_dac,
+                    paths_via_fft,
+                    paths_via_fft_and_dac,
+                },
+            );
         }
     }
-    &cache[from]
+    cache.get(from).unwrap().clone()
 }
 
-fn part2(graph: &Graph) -> usize {
+fn part2(graph: &Graph) -> u64 {
     let mut cache = HashMap::new();
     let paths = traverse_cached(&graph, &"svr", &mut cache);
-    println!("{:?}", paths);
-    0
+    paths.paths_via_fft_and_dac
 }
 
 fn main() {
