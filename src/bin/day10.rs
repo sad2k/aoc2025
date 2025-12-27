@@ -1,6 +1,8 @@
 use std::collections::HashSet;
 use std::fs;
 use std::str::Lines;
+use z3::Solver;
+use z3::ast::Int;
 
 #[derive(Debug)]
 struct Machine {
@@ -38,7 +40,11 @@ fn parse(lines: Lines) -> Vec<Machine> {
             .split(",")
             .map(|s| s.parse::<u32>().unwrap())
             .collect::<Vec<_>>();
-        res.push(Machine { diagram, buttons, joltage })
+        res.push(Machine {
+            diagram,
+            buttons,
+            joltage,
+        })
     }
     res
 }
@@ -89,7 +95,7 @@ fn solve0(
     new_current
 }
 
-fn solve(machine: &Machine) -> u64 {
+fn solve1(machine: &Machine) -> u64 {
     let state = vec![false; machine.diagram.len()];
     let buttons = HashSet::from_iter(machine.buttons.clone());
     solve0(&state, &machine.diagram, &buttons, 1, None).unwrap() as u64
@@ -99,20 +105,61 @@ fn part1(machines: &Vec<Machine>) -> u64 {
     let mut res = 0;
     for (i, m) in machines.iter().enumerate() {
         println!("Solving {i} buttons: {}", m.buttons.len());
-        res += solve(m);
+        res += solve1(m);
     }
     res
 }
 
+fn solve2(machine: &Machine) -> u64 {
+    let mut presses = Vec::new();
+    for b in 0..machine.buttons.len() {
+        presses.push(Int::fresh_const(&b.to_string()));
+    }
+    let solver = Solver::new();
+    for p in &presses {
+        solver.assert(p.ge(0));
+    }
+    for (joltage_id, joltage) in machine.joltage.iter().enumerate() {
+        let mut included_buttons = Vec::new();
+        for (button_id, b) in machine.buttons.iter().enumerate() {
+            if b.contains(&(joltage_id as u32)) {
+                included_buttons.push(&presses[button_id]);
+            }
+        }
+        if !included_buttons.is_empty() {
+            let sum = Int::add(&included_buttons);
+            solver.assert(sum.eq(*joltage));
+        }
+    }
+    let solutions = solver.solutions(presses, true);
+    let mut res: Option<u64> = None;
+    for solution in solutions {
+        // println!("Solution {:?}", solution);
+        let sum = solution
+            .iter()
+            .map(Int::as_u64)
+            .map(Option::unwrap)
+            .sum::<u64>();
+        if res.is_none() || sum < res.unwrap() {
+            res = Some(sum);
+        }
+    }
+    res.unwrap()
+}
+
 fn part2(machines: &Vec<Machine>) -> u64 {
-    0
+    let mut res = 0;
+    for (i, m) in machines.iter().enumerate() {
+        println!("Solving {i} buttons: {}", m.buttons.len());
+        res += solve2(m);
+    }
+    res
 }
 
 fn main() {
     let contents = fs::read_to_string("inputs/day10.txt").unwrap();
     let lines = contents.lines();
     let parsed = parse(lines);
-    println!("{parsed:?}");
 
     // part 1
     // println!("{:?}", part1(&parsed));
