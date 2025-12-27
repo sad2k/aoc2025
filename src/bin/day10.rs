@@ -6,6 +6,7 @@ use std::str::Lines;
 struct Machine {
     diagram: Vec<bool>,
     buttons: Vec<Vec<u32>>,
+    joltage: Vec<u32>,
 }
 
 fn parse_button(button: &str) -> Vec<u32> {
@@ -31,7 +32,13 @@ fn parse(lines: Lines) -> Vec<Machine> {
             .split_whitespace()
             .map(|s| parse_button(&s[1..s.len() - 1]))
             .collect::<Vec<_>>();
-        res.push(Machine { diagram, buttons })
+        let joltage = spl[1];
+        let joltage = &joltage[0..joltage.len() - 1];
+        let joltage = joltage
+            .split(",")
+            .map(|s| s.parse::<u32>().unwrap())
+            .collect::<Vec<_>>();
+        res.push(Machine { diagram, buttons, joltage })
     }
     res
 }
@@ -97,11 +104,19 @@ fn part1(machines: &Vec<Machine>) -> u64 {
     res
 }
 
+fn part2(machines: &Vec<Machine>) -> u64 {
+    0
+}
+
 fn main() {
     let contents = fs::read_to_string("inputs/day10.txt").unwrap();
     let lines = contents.lines();
     let parsed = parse(lines);
+    println!("{parsed:?}");
 
     // part 1
-    println!("{:?}", part1(&parsed));
+    // println!("{:?}", part1(&parsed));
+
+    // part 1
+    println!("{:?}", part2(&parsed));
 }
