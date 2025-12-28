@@ -55,7 +55,6 @@ fn part1(presents: &Vec<Present>, shapes: &Vec<Shape>) -> usize {
     for shape in shapes {
         let area = shape.width as u64 * shape.length as u64;
 
-        // if definitely can't fit
         let min_area = shape
             .presents
             .iter()
